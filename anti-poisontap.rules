@@ -1,0 +1,6 @@
+# log env
+#ACTION=="add", SUBSYSTEMS=="usb", SUBSYSTEM=="net", RUN+="/bin/sh -c 'env > /tmp/usb_net.log'"
+
+# check MAC of new USB network device
+ACTION=="add", SUBSYSTEMS=="usb", SUBSYSTEM=="net", RUN+="/usr/local/bin/match_usb_network_device"
+

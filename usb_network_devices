@@ -1,0 +1,4 @@
+# list of authorized USB network MAC addresses
+# either of the following formats will be recognized
+#68:7f:74:b5:84:ec
+#687f74b584ec

@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+#
+
+MAC_FILE=/etc/usb_network_devices
+LOG_FILE=/tmp/usb_net.log
+
+# UDEV ENV{ID_NET_NAME_MAC} 
+#   eg. enx687f74b584ec == 68:7f:74:b5:84:ec
+# UDEV ENV{DEVPATH}
+#   eg. /devices/pci0000:00/0000:00:14.0/usb1/1-1/1-1:1.0/net/eth3
+# return 0 for unauthorized
+# return 1 for authorized
+
+# fail open if list of MACs not found
+[ -n "$MAC_FILE" -a -r "$MAC_FILE" ] || exit 0
+
+# if not a USB ethernet device, quit
+[ "${ID_NET_NAME_MAC/enx?*/enx}" == "enx" ] || exit 0
+
+# strip device type
+MAC=${ID_NET_NAME_MAC##???}
+
+SYSFS_PATH=/sys$(dirname $(dirname $(dirname -- "$DEVPATH")))/authorized
+
+if tr -d ': ' < $MAC_FILE | grep -qiw "^$MAC" ; then
+  # MAC found, authorize
+  echo "$MAC found in $MAC_FILE, writing 1 to $SYSFS_PATH" >> $LOG_FILE
+  echo 1 > $SYSFS_PATH
+else
+  # MAC not found, do not authorize
+  echo "$MAC not found in $MAC_FILE, writing 0 to $SYSFS_PATH" >> $LOG_FILE
+  echo 0 > $SYSFS_PATH
+fi
